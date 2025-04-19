@@ -1,42 +1,76 @@
-<script>
-    // Array para armazenar seleções
-    const selecoes = [];
+// Array para armazenar seleções
+const selecoes = [];
 
-    // 1. Controle dos checkboxes
-    document.addEventListener('change', function(e) {
-        if (e.target.classList.contains('checkbox')) {
-            const card = e.target.closest('.card');
-            const nome = card.querySelector('.card-titulo').textContent;
-            
-            if (e.target.checked) {
-                selecoes.push(nome);
-            } else {
-                const index = selecoes.indexOf(nome);
-                if (index !== -1) selecoes.splice(index, 1);
-            }
+// Controle dos checkboxes
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('checkbox')) {
+        const card = e.target.closest('.card');
+        const nome = card.querySelector('.card-titulo').textContent;
+        
+        if (e.target.checked) {
+            selecoes.push(nome);
+        } else {
+            const index = selecoes.indexOf(nome);
+            if (index !== -1) selecoes.splice(index, 1);
         }
-    });
-
-// 2. Controle da seta e expansão
-document.addEventListener('click', function(e) {
-    // Se clicou na seta
-    if (e.target.classList.contains('card-seta')) {
-        const card = e.target.closest('.card');
-        card.classList.toggle('ativo');
-        e.target.style.transform = card.classList.contains('ativo') ? 'rotate(180deg)' : 'rotate(0)';
     }
-    
-    // Se clicou no cabeçalho (mas não no checkbox)
-    if (e.target.classList.contains('card-header') && 
-        !e.target.closest('label') && 
-        !e.target.closest('.checkbox')) {
+});
+
+// Controle da seta e expansão
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('card-seta') || 
+        e.target.closest('.card-header')) {
         const card = e.target.closest('.card');
-        const seta = card.querySelector('.card-seta');
         card.classList.toggle('ativo');
+        const seta = card.querySelector('.card-seta');
         seta.style.transform = card.classList.contains('ativo') ? 'rotate(180deg)' : 'rotate(0)';
     }
 });
 
+// Função de delay para evitar bloqueio
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Função principal (SEMPRE SEM API KEY)
+async function criarRoteiroMaps() {
+    if (selecoes.length < 2) {
+        alert("Selecione pelo menos 2 locais!");
+        return;
+    }
+
+    // 1. Obter coordenadas via OpenStreetMap (gratuito)
+    const locaisComCoordenadas = [];
+    for (const nome of selecoes) {
+        try {
+            const resposta = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(nome)}+Rio+de+Janeiro&limit=1`);
+            const dados = await resposta.json();
+            
+            if (dados.length > 0) {
+                locaisComCoordenadas.push({
+                    nome,
+                    location: {
+                        lat: parseFloat(dados[0].lat),
+                        lng: parseFloat(dados[0].lon)
+                    }
+                });
+            }
+            await delay(1000); // Respeita o limite de requisições
+        } catch (erro) {
+            console.error("Erro ao buscar:", nome, erro);
+        }
+    }
+
+    // 2. Gerar rota no Maps
+    if (locaisComCoordenadas.length >= 2) {
+        const waypoints = locaisComCoordenadas.map(l => `${l.location.lat},${l.location.lng}`).join('/');
+        window.open(`https://www.google.com/maps/dir/${waypoints}`, '_blank');
+    } else {
+        alert("Não foi possível traçar a rota. Adicione 'Rio de Janeiro' aos nomes dos locais para melhor precisão.");
+    }
+}
+
+// Navegação entre seções
 function proximaSecao() {
     const secaoAtual = document.querySelector('.secao.active');
     const proximaSecao = document.querySelector(`[data-secao="${parseInt(secaoAtual.dataset.secao) + 1}"]`);
@@ -44,76 +78,21 @@ function proximaSecao() {
     if (proximaSecao) {
         secaoAtual.classList.remove('active');
         proximaSecao.classList.add('active');
-        
-        // Desativa a seta direita se for a última seção
-        const btnDireita = document.querySelector('.secao-navegacao button:last-child');
-        btnDireita.disabled = proximaSecao.id === 'final';
     }
 }
-    function voltarSecao() {
-        const secaoAtual = document.querySelector('.secao.active');
-        const secaoAnterior = document.querySelector(`[data-secao="${parseInt(secaoAtual.dataset.secao) - 1}"]`);
-        
-        if (secaoAnterior) {
-            secaoAtual.classList.remove('active');
-            secaoAnterior.classList.add('active');
-        }
-    }
 
-    // 4. Atualiza lista final
-    function atualizarListaFinal() {
-        const lista = document.getElementById('lista-final');
-        lista.innerHTML = selecoes.map(item => `<li>${item}</li>`).join('');
+function voltarSecao() {
+    const secaoAtual = document.querySelector('.secao.active');
+    const secaoAnterior = document.querySelector(`[data-secao="${parseInt(secaoAtual.dataset.secao) - 1}"]`);
+    
+    if (secaoAnterior) {
+        secaoAtual.classList.remove('active');
+        secaoAnterior.classList.add('active');
     }
+}
 
-    // 5. Botão do Maps (CORRIGIDO)
-    async function criarRoteiroMaps() {
-        if (selecoes.length < 2) {
-            alert("Selecione pelo menos 2 locais!");
-            return;
-        }
-    
-        // 1. Obter coordenadas dos locais (usando Geocoding API)
-        const locaisComCoordenadas = await Promise.all(
-            selecoes.map(async nome => {
-                const resposta = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(nome)}&key=AIzaSyCTNMJ4K7MZewZ8uFRTxnwDsHzxFjIFXhI`);
-                const dados = await resposta.json();
-                return {
-                    nome,
-                    location: dados.results[0].geometry.location // { lat, lng }
-                };
-            })
-        );
-    
-        // 2. Calcular distâncias entre todos os pares (Distance Matrix API)
-        const origens = locaisComCoordenadas.map(l => `${l.location.lat},${l.location.lng}`).join('|');
-        const resposta = await fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origens}&destinations=${origens}&key=SUA_CHAVE_API`);
-        const dados = await resposta.json();
-    
-        // 3. Ordenar por proximidade (algoritmo simplificado)
-        const roteiroOrdenado = [locaisComCoordenadas[0].nome]; // Começa com o primeiro item
-        let atual = 0;
-    
-        while (roteiroOrdenado.length < locaisComCoordenadas.length) {
-            let maisProximo = null;
-            let menorDistancia = Infinity;
-    
-            for (let i = 0; i < dados.rows[atual].elements.length; i++) {
-                if (i !== atual && !roteiroOrdenado.includes(locaisComCoordenadas[i].nome)) {
-                    const distancia = dados.rows[atual].elements[i].distance.value;
-                    if (distancia < menorDistancia) {
-                        menorDistancia = distancia;
-                        maisProximo = i;
-                    }
-                }
-            }
-    
-            if (maisProximo !== null) {
-                roteiroOrdenado.push(locaisComCoordenadas[maisProximo].nome);
-                atual = maisProximo;
-            }
-        }
-    
-        // 4. Abrir Maps com a rota ordenada
-        const waypoints = roteiroOrdenado.map(encodeURIComponent).join('/');
-        window.open(`https://www.google.com/maps/dir/${waypoints}`, '_blank');
+// Mostrar seção inicial
+function mostrarSecao(containerId, secaoId) {
+    document.getElementById(containerId).classList.add('active');
+    document.getElementById(secaoId).classList.add('active');
+}
