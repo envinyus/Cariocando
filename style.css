@@ -1,0 +1,329 @@
+/* Reset e Variáveis */
+:root {
+    --rosa-pastel: #FFD1DC;
+    --rosa-ios: #FF9BB3;
+    --lilas-claro: #E8D7FF;
+    --texto: #5A5A5A;
+    --fundo-secao: #FFF5F9;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--texto);
+    background: white;
+    min-height: 100vh;
+}
+
+/* Landing Page */
+.landing {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    transition: all 0.5s ease;
+    z-index: 10;
+}
+
+.landing-bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, var(--rosa-ios), var(--lilas-claro));
+    opacity: 0.9;
+    z-index: -1;
+}
+
+.landing-content {
+    max-width: 400px;
+}
+
+h1 {
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+.start-btn {
+    background: white;
+    color: var(--rosa-ios);
+    border: none;
+    padding: 15px 30px;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.start-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* Seção de Opções */
+.secao {
+    display: none;
+    background: var(--fundo-secao);
+    min-height: 100vh;
+    padding-top: 60px;
+}
+
+.secao.active {
+    display: block;
+}
+
+.secao-header {
+    background: var(--rosa-ios);
+    padding: 25px 20px;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.secao-header h2 {
+    color: white;
+    font-size: 1.5rem;
+}
+
+.header-decoration {
+    position: absolute;
+    bottom: -15px;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    background: var(--rosa-ios);
+    clip-path: polygon(0 0, 100% 0, 100% 50%, 0 100%);
+    opacity: 0.3;
+}
+
+/* Cards de Opções */
+.opcoes {
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    padding: 18px;
+    cursor: pointer;
+}
+
+/* ===== CHECKBOXES rosa ===== */
+.checkbox {
+    position: absolute;
+    opacity: 0;
+}
+
+.custom-checkbox {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--rosa-ios);
+    border-radius: 6px;
+    margin-right: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.checkbox:checked + .custom-checkbox {
+    background: var(--rosa-ios);
+    transform: scale(1.1);
+}
+
+.checkbox:checked + .custom-checkbox::after {
+    content: "✓";
+    color: white;
+    font-size: 14px;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    padding: 18px;
+    cursor: pointer;
+    position: relative;
+}
+
+.card-detalhes {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    padding: 0 18px;
+}
+
+.card.ativo .card-detalhes {
+    max-height: 500px;
+    padding: 0 18px 18px;
+}
+
+.descricao {
+    margin-bottom: 15px;
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+
+.maps-link {
+    color: var(--rosa-ios);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+/* Navegação */
+.navegacao {
+    padding: 30px 20px;
+}
+
+.btn-voltar {
+    background: white;
+    color: var(--rosa-ios);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    cursor: pointer;
+}
+
+/* Efeitos de Brilho */
+.secao::after {
+    content: "";
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* Responsivo */
+@media (max-width: 500px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    .secao-header {
+        padding: 20px 15px;
+    }
+    
+    .card-header {
+        padding: 15px;
+    }
+}
+/* Tela Final */
+.final {
+    padding: 20px;
+    text-align: center;
+}
+
+.final-lista {
+    list-style: none;
+    margin: 30px 0;
+}
+
+.final-lista li {
+    padding: 12px;
+    border-bottom: 1px dashed var(--rosa-ios);
+    animation: fadeIn 0.5s ease forwards;
+    animation-delay: calc(var(--i) * 0.1s);
+    opacity: 0;
+}
+/* Botão do Maps (estilo consistente) */
+#final button {
+    background: var(--rosa-ios);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 30px auto;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(255, 155, 179, 0.3);
+    transition: all 0.3s ease;
+}
+
+#final button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(255, 155, 179, 0.4);
+}
+/* ===== NOVAS REGRAS ===== */
+.checkbox {
+    position: absolute;
+    opacity: 0;
+}
+
+.custom-checkbox {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--rosa-ios);
+    border-radius: 6px;
+    margin-right: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.checkbox:checked + .custom-checkbox {
+    background: var(--rosa-ios);
+    animation: pulse 0.5s;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+/* Garante que o label não propague eventos */
+.card-header label {
+    pointer-events: none;
+}
+
+.card-header label .custom-checkbox {
+    pointer-events: auto;
+}

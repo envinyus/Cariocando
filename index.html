@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cariocando o Mineiro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --rosa-ios: #FF9BB3;
+            --lilas-claro: #E8D7FF;
+            --texto: #5A5A5A;
+            --fundo-secao: #FFF5F9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--texto);
+            background: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Tela Inicial */
+        .landing {
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--rosa-ios), var(--lilas-claro));
+            z-index: 10;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            color: white;
+            opacity: 0.9;
+        }
+
+        .start-btn {
+            background: white;
+            color: var(--rosa-ios);
+            border: none;
+            padding: 16px 32px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        /* Seções */
+        .secao-container {
+            display: none;
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            top: 0;
+            left: 0;
+            background: var(--fundo-secao);
+            z-index: 20;
+            overflow-y: auto;
+        }
+
+        .secao-container.active {
+            display: block;
+        }
+
+        .secao {
+            display: none;
+            padding-bottom: 80px;
+        }
+
+        .secao.active {
+            display: block;
+        }
+
+        /* Cabeçalho Simétrico */
+        .secao-header {
+            background: var(--rosa-ios);
+            padding: 70px 20px 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .secao-header h2 {
+            font-family: 'Playfair Display', serif;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        /* Cards com Seta (↓) */
+        .opcoes {
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            padding: 18px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .custom-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--rosa-ios);
+            border-radius: 6px;
+            margin-right: 15px;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .checkbox {
+            position: absolute;
+            opacity: 0;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .checkbox:checked + .custom-checkbox {
+            background: var(--rosa-ios);
+        }
+
+        .checkbox:checked + .custom-checkbox::after {
+            content: "✓";
+            color: white;
+            font-size: 14px;
+        }
+
+        .card-titulo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            flex-grow: 1;
+        }
+
+        .card-seta {
+            color: var(--rosa-ios);
+            transition: transform 0.3s ease;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+
+        .card.ativo .card-seta {
+            transform: rotate(180deg);
+        }
+
+        .card-detalhes {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 18px;
+        }
+
+        .card.ativo .card-detalhes {
+            max-height: 500px;
+            padding: 0 18px 18px;
+        }
+
+        .card-imagem {
+            width: 100%;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .card-descricao {
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .maps-link {
+            color: var(--rosa-ios);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* Navegação Inferior */
+        .secao-navegacao {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 20px;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            box-shadow: 0 -5px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        .secao-btn {
+            background: var(--rosa-ios);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .secao-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .secao-btn:hover:not(:disabled) {
+            transform: scale(1.1);
+        }
+
+        /* Responsivo */
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 2rem;
+            }
+            .secao-header {
+                padding-top: 50px;
+            }
+        }
+
+        /* Garante que o clique no checkbox não propague */
+        .checkbox-container {
+            pointer-events: none;
+        }
+        .checkbox-container > * {
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela Inicial -->
+    <section class="landing active" id="landing">
+        <h1>📅 Bem-vindo ao Encontro do Século! ♡</h1>
+        <p class="subtitle">Preparei alguns planos para distraí-lo no ônibus e mostrá-lo algumas belezas do capitalismo e da cidade mais bela do Brasil 🌊</p>
+        <p class="subtitle">Preparado? 😉🎯</p>
+        <button class="start-btn" onclick="mostrarSecao('secao-container', 'parte1')">
+            <span>Ainda bb</span>
+            <i class="fas fa-arrow-right"></i>
+        </button>
+    </section>
+
+    <!-- Seções -->
+    <div class="secao-container" id="secao-container">
+        <!-- Seção 1 -->
+        <section class="secao active" id="parte1" data-secao="1">
+            <div class="secao-header">
+                <h2>☕ Café da Manhã</h2>
+            </div>
+            
+            <div class="opcoes">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="checkbox" id="checkbox1">
+                            <div class="custom-checkbox"></div>
+                            <h3 class="card-titulo">Alva Padaria Artesanal</h3>
+                        </div>
+                        <i class="fas fa-chevron-down card-seta"></i>
+                    </div>
+                    <div class="card-detalhes">
+                
+                        <p class="card-descricao">Padaria simples de Copacabana, sua aparência não chama atenção, mas famosa por seus incríveis doces artesanais e veganos. Uma das confeitarias mais conhecidas hoje no Rio, formando filas cheias de ansiedade por essa experiência. Para chegarmos nela, caminharemos pela orla e admiraremos a beleza carioca durante alguns minutos.</p>
+                        
+                        <a href="https://www.google.com/maps?q=-22.970339,-43.186486" class="maps-link" target="_blank">
+                            <i class="fas fa-map-marker-alt"></i> Ver no Maps
+                        </a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="checkbox" id="checkbox2">
+                            <div class="custom-checkbox"></div>
+                            <h3 class="card-titulo">Sova</h3>
+                        </div>
+                        <i class="fas fa-chevron-down card-seta"></i>
+                    </div>
+                    <div class="card-detalhes">
+                        <p class="card-descricao">Com certeza um dos grandes queridos de Copacabana. o Sova não se destaca por sua variedade ou paisagens, mas pelo cuidado e delicadeza em seus pães, onde todos são feitos com fermentação natural, garantindo um sabor único em cada produto.
+                        </p>
+                        <a href="https://maps.app.goo.gl/yMgr9Vu2RvxXKHkAA" class="maps-link" target="_blank">
+                            <i class="fas fa-map-marker-alt"></i> Ver no Maps
+                        </a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="checkbox" id="checkbox3">
+                            <div class="custom-checkbox"></div>
+                            <h3 class="card-titulo">Brisa Café</h3>
+                        </div>
+                        <i class="fas fa-chevron-down card-seta"></i>
+                    </div>
+                    <div class="card-detalhes">
+                        <p class="card-descricao">Além de desfrutarmos de uma bela caminhada pela orla, o restaurante proporciona uma ótima experiência ao ar livre, visando promover o prazer de degustar um delicioso café e cigarro enquanto admira a beleza natural da praia. A localização é ótima, próxima à praia do Arpoador e do nosso museu militar, O Forte.</p>
+                        <a href="https://maps.app.goo.gl/cL5ZVF5XXVYfuo15A" class="maps-link" target="_blank">
+                            <i class="fas fa-map-marker-alt"></i> Ver no Maps
+                        </a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="checkbox" id="checkbox4">
+                            <div class="custom-checkbox"></div>
+                            <h3 class="card-titulo">Confeitaria Colombo Café do Forte</h3>
+                        </div>
+                        <i class="fas fa-chevron-down card-seta"></i>
+                    </div>
+                    <div class="card-detalhes">
+                        <p class="card-descricao">Agora temos uma ótima (ou não) opção para um mineiro historiador: a Colombo. Famosa por tudo: cafés, pães, doces, atendimento, localidade,
+                            e, claro, por ser dentro do museu. O recinto é lindo por dentro e fora, afinal dentro você admira a beleza de uma confeitaria extremamente tradicional, fora você tem uma das vistas mais belas da praia, vista essa privilegiada para o pôr do Sol.</p>
+                        <p class="card-descricao">Obs.: enche pra caralho e pra ver o museu é 10 conto a entrada (pra ver militar ainda)</p>
+                        <a href="https://maps.app.goo.gl/Nk9zJBJ99TamxuAo7" class="maps-link" target="_blank">
+                            <i class="fas fa-map-marker-alt"></i> Ver no Maps
+                        </a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="checkbox" id="checkbox5">
+                            <div class="custom-checkbox"></div>
+                            <h3 class="card-titulo">Farro</h3>
+                        </div>
+                        <i class="fas fa-chevron-down card-seta"></i>
+                    </div>
+                    <div class="card-detalhes">
+                        <p class="card-descricao">Sejamos sinceros, já babei ovo de muito estabelecimento aqui e faltou criatividade e repertório para falar dele.
+                            Todavia o Farro conta com anos de história no Centro do Rio, famosa. Pelo quê? Sinceramente, não sei. A padaria fica próxima à Estátua de Carlos Drummond de Andrade, localizada em outro extremo da praia, mas não andaríamos pela orla e, sim, pela cidade.</p>
+                        <a href="https://maps.app.goo.gl/5uZpfS21sd4xQ6cJ9" class="maps-link" target="_blank">
+                            <i class="fas fa-map-marker-alt"></i> Ver no Maps
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 2 -->
+        <section class="secao" id="parte2" data-secao="2">
+            <div class="secao-header">
+                <h2>Lamén 🍜</h2>
+            </div>
+            
+            <div class="opcoes">
+                <!-- Adicione cards aqui -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="checkbox" id="checkbox6">
+                            <div class="custom-checkbox"></div>
+                            <h3 class="card-titulo">Haru Sushi Bar</h3>
+                        </div>
+                        <i class="fas fa-chevron-down card-seta"></i>
+                    </div>
+                    <div class="card-detalhes">
+                        <p class="card-descricao">Sequer já pisei lá, porém o carro-chefe é o lamen que parece do Naruto e é próximo à praia</p>
+                        <a href="https://maps.app.goo.gl/gojVTpRnuMrrb5hH6" class="maps-link" target="_blank">
+                            <i class="fas fa-map-marker-alt"></i> Ver no Maps
+                        </a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="checkbox" id="checkbox7">
+                            <div class="custom-checkbox"></div>
+                            <h3 class="card-titulo">Gurumê Rio Sul</h3>
+                        </div>
+                        <i class="fas fa-chevron-down card-seta"></i>
+                    </div>
+                    <div class="card-detalhes">
+                        <p class="card-descricao">Também nunca pisei, mas é outra opção de lamen famosa. o restaurante fica dentro do shopping, então talvez te interesse</p>
+                        <a href="https://maps.app.goo.gl/EQXU2DKZ9PLTuNLC6" class="maps-link" target="_blank">
+                            <i class="fas fa-map-marker-alt"></i> Ver no Maps
+                        </a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="checkbox" id="checkbox8">
+                            <div class="custom-checkbox"></div>
+                            <h3 class="card-titulo">Miako</h3>
+                        </div>
+                        <i class="fas fa-chevron-down card-seta"></i>
+                    </div>
+                    <div class="card-detalhes">
+                        <p class="card-descricao">A opção mais longe, porém o dono é um japonês de verdade, então a comida é conhecida por um sabor único e umami. Próximo ao shopping e outra praia, a Praia de Botafogo (não faço questão)</p>
+                        <a href="https://maps.app.goo.gl/7pYKQJYqUtZ27hdk9" class="maps-link" target="_blank">
+                            <i class="fas fa-map-marker-alt"></i> Ver no Maps
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="secao" id="parte3" data-secao="3">
+            <div class="secao-header">
+                <h2>Besteiras 🍨</h2>
+            </div>
+ <div class="opcoes">
+    <div class="card">
+        <div class="card-header">
+            <div class="checkbox-container">
+                <input type="checkbox" class="checkbox" id="checkbox9">
+                <div class="custom-checkbox"></div>
+                <h3 class="card-titulo">McDonald's Copacabana</h3>
+            </div>
+            <i class="fas fa-chevron-down card-seta"></i>
+        </div>
+        <div class="card-detalhes">
+            <p class="card-descricao">Porra, preciso escrever algo? É o MC, caralho</p>
+            <a href="https://maps.app.goo.gl/zqshBLJLoQEpUM8a7" class="maps-link" target="_blank">
+                <i class="fas fa-map-marker-alt"></i> Ver no Maps
+            </a>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <div class="checkbox-container">
+                <input type="checkbox" class="checkbox" id="checkbox10">
+                <div class="custom-checkbox"></div>
+                <h3 class="card-titulo">Kurtos Rio</h3>
+            </div>
+            <i class="fas fa-chevron-down card-seta"></i>
+        </div>
+        <div class="card-detalhes">
+            <p class="card-descricao">Um novo local de guloseima, um sorvete que promete inovar em relação às casquinhas convencionais. o "apoio" do sorvete é uma massinha similar a um pão, aparentemente. nada a ver com churros</p>
+            <a href="https://maps.app.goo.gl/oFKsiVp2mjaVXCJE9" class="maps-link" target="_blank">
+                <i class="fas fa-map-marker-alt"></i> Ver no Maps
+            </a>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <div class="checkbox-container">
+                <input type="checkbox" class="checkbox" id="checkbox11">
+                <div class="custom-checkbox"></div>
+                <h3 class="card-titulo">Subway Botafogo</h3>
+            </div>
+            <i class="fas fa-chevron-down card-seta"></i>
+        </div>
+        <div class="card-detalhes">
+            <p class="card-descricao">Subwayzin de lei né</p>
+            <a href="https://maps.app.goo.gl/zbzB6fLPjpCwyGWm8" class="maps-link" target="_blank">
+                <i class="fas fa-map-marker-alt"></i> Ver no Maps
+            </a>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <div class="checkbox-container">
+                <input type="checkbox" class="checkbox" id="checkbox12">
+                <div class="custom-checkbox"></div>
+                <h3 class="card-titulo">Duckbill - Cookies & Coffee</h3>
+            </div>
+            <i class="fas fa-chevron-down card-seta"></i>
+        </div>
+        <div class="card-detalhes">
+            <p class="card-descricao">Se nunca tiver provado donut, é uma oportunidade</p>
+            <a href="https://maps.app.goo.gl/QfRS5aNbBCiLRUyg8" class="maps-link" target="_blank">
+                <i class="fas fa-map-marker-alt"></i> Ver no Maps
+            </a>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <div class="checkbox-container">
+                <input type="checkbox" class="checkbox" id="checkbox13">
+                <div class="custom-checkbox"></div>
+                <h3 class="card-titulo">Taco Bell (Botafogo)</h3>
+            </div>
+            <i class="fas fa-chevron-down card-seta"></i>
+        </div>
+        <div class="card-detalhes">
+            <p class="card-descricao">Se nunca tiver provado comida mexicana, é uma oportunidade. é uma rede bem famosa e eu mesmo nunca comi lá, mas tá aí de opção</p>
+            <a href="https://maps.app.goo.gl/gca4gWSMGmK6xPZy9" class="maps-link" target="_blank">
+                <i class="fas fa-map-marker-alt"></i> Ver no Maps
+            </a>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <div class="checkbox-container">
+                <input type="checkbox" class="checkbox" id="checkbox14">
+                <div class="custom-checkbox"></div>
+                <h3 class="card-titulo">Bacio di Latte</h3>
+            </div>
+            <i class="fas fa-chevron-down card-seta"></i>
+        </div>
+        <div class="card-detalhes">
+            <p class="card-descricao">Um dos picolés mais caros e famosos do Rio, porém uma experiência surreal de boa. O picolé é tão gostoso que parece que é ele que te chupa</p>
+            <a href="https://maps.app.goo.gl/y6MyNiMR9P4ZERyw7" class="maps-link" target="_blank">
+                <i class="fas fa-map-marker-alt"></i> Ver no Maps
+            </a>
+        </div>
+    </div>
+</div>
+</section>
+
+        <!-- Seção Final -->
+        <section class="secao" id="final" data-secao="4">
+            <div class="secao-header">
+                <h2>🌟 Dia Finalizado! 🌟</h2>
+            </div>
+            
+            <div class="final" style="text-align: center; padding: 20px 0;">
+                <div style="background: #FDFCED; 
+                            border: 2px dashed #FF9BB3; 
+                            padding: 30px; 
+                            display: inline-block;
+                            max-width: 90%;
+                            min-width: 300px;
+                            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                            position: relative;
+                            margin: 20px auto;">
+                    
+                    <div style="position: absolute; 
+                                top: 10px; 
+                                right: 10px; 
+                                width: 30px; 
+                                height: 30px; 
+                                border-right: 2px dashed #FF9BB3;
+                                border-bottom: 2px dashed #FF9BB3;"></div>
+                    
+                    <h3 style="font-family: 'Playfair Display', serif;
+                               color: #5A5A5A;
+                               margin-bottom: 20px;
+                               border-bottom: 1px solid #FF9BB3;
+                               padding-bottom: 10px;">
+                        Nosso passeio:
+                    </h3>
+                    
+                    <ul id="lista-final" style="list-style: none; 
+                                           padding: 15px 0;
+                                           text-align: left;
+                                           margin: 0 auto;
+                                           display: inline-block;">
+                        <!-- Itens aparecem aqui via JavaScript -->
+                    </ul>
+                    
+                    <button onclick="criarRoteiroMaps()" 
+                            style="background: #A8E1FF; 
+                                   border: none; 
+                                   padding: 12px 30px; 
+                                   border-radius: 25px; 
+                                   cursor: pointer;
+                                   font-family: 'Montserrat', sans-serif;
+                                   font-size: 1rem;
+                                   margin-top: 25px;
+                                   transition: all 0.3s ease;
+                                   box-shadow: 0 3px 10px rgba(168, 225, 255, 0.5);">
+                        <i class="fas fa-map-marked-alt"></i> Pegar a visão
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navegação Inferior -->
+        <div class="secao-navegacao">
+            <button class="secao-btn" onclick="voltarSecao()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <button class="secao-btn" onclick="proximaSecao()">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Array para armazenar seleções
+        const selecoes = [];
+
+        // 1. Controle dos checkboxes
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('checkbox')) {
+                const card = e.target.closest('.card');
+                const nome = card.querySelector('.card-titulo').textContent;
+                
+                if (e.target.checked) {
+                    selecoes.push(nome);
+                } else {
+                    const index = selecoes.indexOf(nome);
+                    if (index !== -1) selecoes.splice(index, 1);
+                }
+                atualizarListaFinal();
+            }
+        });
+
+        // 2. Controle da seta e expansão
+        document.addEventListener('click', function(e) {
+            // Se clicou na seta
+            if (e.target.classList.contains('card-seta')) {
+                const card = e.target.closest('.card');
+                card.classList.toggle('ativo');
+            }
+            
+            // Se clicou no cabeçalho (mas não no checkbox ou label)
+            if (e.target.classList.contains('card-header') && 
+                !e.target.closest('.checkbox-container')) {
+                const card = e.target.closest('.card');
+                card.classList.toggle('ativo');
+            }
+        });
+
+        // 3. Navegação entre seções
+        function proximaSecao() {
+            const secaoAtual = document.querySelector('.secao.active');
+            const proximaSecao = document.querySelector(`[data-secao="${parseInt(secaoAtual.dataset.secao) + 1}"]`);
+            
+            if (proximaSecao) {
+                secaoAtual.classList.remove('active');
+                proximaSecao.classList.add('active');
+                
+                // Desativa a seta direita se for a última seção
+                const btnDireita = document.querySelector('.secao-navegacao button:last-child');
+                btnDireita.disabled = proximaSecao.id === 'final';
+                
+                // Atualiza lista quando chegar na tela final
+                if (proximaSecao.id === 'final') {
+                    atualizarListaFinal();
+                }
+            }
+        }
+
+        function voltarSecao() {
+            const secaoAtual = document.querySelector('.secao.active');
+            const secaoAnterior = document.querySelector(`[data-secao="${parseInt(secaoAtual.dataset.secao) - 1}"]`);
+            
+            if (secaoAnterior) {
+                secaoAtual.classList.remove('active');
+                secaoAnterior.classList.add('active');
+                
+                // Ativa a seta direita se voltar da tela final
+                const btnDireita = document.querySelector('.secao-navegacao button:last-child');
+                btnDireita.disabled = false;
+            }
+        }
+
+        // 4. Mostrar seção
+        function mostrarSecao(containerId, secaoId) {
+            document.getElementById(containerId).classList.add('active');
+            document.getElementById(secaoId).classList.add('active');
+        }
+
+        // 5. Atualiza lista final
+        function atualizarListaFinal() {
+            const lista = document.getElementById('lista-final');
+            lista.innerHTML = selecoes.map(item => `<li>${item}</li>`).join('');
+        }
+
+        // 6. Botão do Maps
+        async function criarRoteiroMaps() {
+            if (selecoes.length < 2) {
+                alert("Seleciona pelo menos 2, né, porra!");
+                return;
+            }
+            
+            // Abre o Maps com os locais selecionados (versão simplificada)
+            const waypoints = selecoes.map(encodeURIComponent).join('/');
+            window.open(`https://www.google.com/maps/dir/${waypoints}`, '_blank');
+        }
+    </script>
+</body>
+</html>
